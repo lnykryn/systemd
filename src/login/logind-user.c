@@ -70,7 +70,7 @@ int user_new(Manager *m, UserRecord *ur, User **ret) {
                 return -ENOMEM;
 
         xsprintf(lu, UID_FMT, ur->uid);
-        r = slice_build_subslice(SPECIAL_USER_SLICE, lu, &u->slice);
+        r = slice_build_subslice(ur->slice?:SPECIAL_USER_SLICE, lu, &u->slice);
         if (r < 0)
                 return r;
 

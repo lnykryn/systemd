@@ -12,6 +12,7 @@
 #include "process-util.h"
 #include "rlimit-util.h"
 #include "sha256.h"
+#include "special.h"
 #include "strv.h"
 #include "terminal-util.h"
 #include "user-record-show.h"
@@ -368,6 +369,8 @@ void user_record_show(UserRecord *hr, bool show_full_group_info) {
 
         if (nice_is_valid(hr->nice_level))
                 printf("        Nice: %i\n", hr->nice_level);
+
+        printf("       Slice: %s\n", hr->slice?:SPECIAL_USER_SLICE);
 
         for (int j = 0; j < _RLIMIT_MAX; j++) {
                 if (hr->rlimits[j])
