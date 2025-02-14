@@ -19,6 +19,7 @@
 #include "pkcs11-util.h"
 #include "rlimit-util.h"
 #include "sha256.h"
+#include "special.h"
 #include "string-table.h"
 #include "strv.h"
 #include "uid-classification.h"
@@ -42,6 +43,7 @@ UserRecord* user_record_new(void) {
                 .last_change_usec = UINT64_MAX,
                 .last_password_change_usec = UINT64_MAX,
                 .umask = MODE_INVALID,
+                .slice = NULL,
                 .nice_level = INT_MAX,
                 .not_before_usec = UINT64_MAX,
                 .not_after_usec = UINT64_MAX,
@@ -149,6 +151,7 @@ static UserRecord* user_record_free(UserRecord *h) {
         erase_and_free(h->password_hint);
         free(h->location);
         free(h->icon_name);
+        free(h->slice);
 
         free(h->blob_directory);
         hashmap_free(h->blob_manifest);
@@ -1245,6 +1248,7 @@ static int dispatch_per_machine(const char *name, sd_json_variant *variant, sd_j
                 { "shell",                      SD_JSON_VARIANT_STRING,        json_dispatch_filename_or_path,       offsetof(UserRecord, shell),                         0              },
                 { "umask",                      SD_JSON_VARIANT_UNSIGNED,      json_dispatch_umask,                  offsetof(UserRecord, umask),                         0              },
                 { "environment",                SD_JSON_VARIANT_ARRAY,         json_dispatch_strv_environment,       offsetof(UserRecord, environment),                   0              },
+                { "slice",                      SD_JSON_VARIANT_STRING,        sd_json_dispatch_string,              offsetof(UserRecord, slice),                         0              },
                 { "timeZone",                   SD_JSON_VARIANT_STRING,        sd_json_dispatch_string,              offsetof(UserRecord, time_zone),                     SD_JSON_STRICT },
                 { "preferredLanguage",          SD_JSON_VARIANT_STRING,        json_dispatch_locale,                 offsetof(UserRecord, preferred_language),            0              },
                 { "additionalLanguages",        SD_JSON_VARIANT_ARRAY,         json_dispatch_locales,                offsetof(UserRecord, additional_languages),          0              },
@@ -1598,6 +1602,7 @@ int user_record_load(UserRecord *h, sd_json_variant *v, UserRecordLoadFlags load
                 { "shell",                      SD_JSON_VARIANT_STRING,        json_dispatch_filename_or_path,       offsetof(UserRecord, shell),                         0              },
                 { "umask",                      SD_JSON_VARIANT_UNSIGNED,      json_dispatch_umask,                  offsetof(UserRecord, umask),                         0              },
                 { "environment",                SD_JSON_VARIANT_ARRAY,         json_dispatch_strv_environment,       offsetof(UserRecord, environment),                   0              },
+                { "slice",                      SD_JSON_VARIANT_STRING,        sd_json_dispatch_string,              offsetof(UserRecord, slice),                         0              },
                 { "timeZone",                   SD_JSON_VARIANT_STRING,        sd_json_dispatch_string,              offsetof(UserRecord, time_zone),                     SD_JSON_STRICT },
                 { "preferredLanguage",          SD_JSON_VARIANT_STRING,        json_dispatch_locale,                 offsetof(UserRecord, preferred_language),            0              },
                 { "additionalLanguages",        SD_JSON_VARIANT_ARRAY,         json_dispatch_locales,                offsetof(UserRecord, additional_languages),          0              },

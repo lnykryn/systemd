@@ -270,6 +270,7 @@ typedef struct UserRecord {
 
         char *shell;
         mode_t umask;
+        char *slice;
         char **environment;
         char *time_zone;
         char *preferred_language;

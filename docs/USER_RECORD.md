@@ -306,6 +306,8 @@ it actually appears in the JSON record).
 This `umask` is automatically set by [`pam_systemd`](https://www.freedesktop.org/software/systemd/man/pam_systemd.html)
 for all login sessions of the user.
 
+`slice` → Define a parent `slice` for the user. If not set `user.slice` is used.
+
 `environment` → An array of strings, each containing an environment variable
 and its value to set for the user's login session, in a format compatible with
 [`putenv()`](https://man7.org/linux/man-pages/man3/putenv.3.html). Any
@@ -785,7 +787,7 @@ All other fields that may be used in this section are identical to the equally n
 `regular` section (i.e. at the top-level object). Specifically, these are:
 
 `blobDirectory`, `blobManifest`, `iconName`, `location`, `shell`, `umask`,
-`environment`, `timeZone`, `preferredLanguage`, `additionalLanguages`,
+`slice`, `environment`, `timeZone`, `preferredLanguage`, `additionalLanguages`,
 `niceLevel`, `resourceLimits`, `locked`, `notBeforeUSec`, `notAfterUSec`,
 `storage`, `diskSize`, `diskSizeRelative`, `skeletonDirectory`, `accessMode`,
 `tasksMax`, `memoryHigh`, `memoryMax`, `cpuWeight`, `ioWeight`,
