@@ -44,6 +44,7 @@ static void timer_init(Unit *u) {
         t->next_elapse_realtime = USEC_INFINITY;
         t->accuracy_usec = u->manager->defaults.timer_accuracy_usec;
         t->remain_after_elapse = true;
+        t->catch_up = true;
 }
 
 void timer_free_values(Timer *t) {
@@ -247,7 +248,8 @@ static void timer_dump(Unit *u, FILE *f, const char *prefix) {
                 "%sFixedRandomDelay: %s\n"
                 "%sOnClockChange: %s\n"
                 "%sOnTimeZoneChange: %s\n"
-                "%sDeferReactivation: %s\n",
+                "%sDeferReactivation: %s\n"
+                "%sCatchUp: %s\n",
                 prefix, timer_state_to_string(t->state),
                 prefix, timer_result_to_string(t->result),
                 prefix, trigger ? trigger->id : "n/a",
@@ -258,7 +260,8 @@ static void timer_dump(Unit *u, FILE *f, const char *prefix) {
                 prefix, yes_no(t->fixed_random_delay),
                 prefix, yes_no(t->on_clock_change),
                 prefix, yes_no(t->on_timezone_change),
-                prefix, yes_no(t->defer_reactivation));
+                prefix, yes_no(t->defer_reactivation),
+                prefix, yes_no(t->catch_up));
 
         LIST_FOREACH(value, v, t->values)
                 if (v->base == TIMER_CALENDAR) {
@@ -437,6 +440,17 @@ static void timer_enter_waiting(Timer *t, bool time_change) {
 
                         v->next_elapse += random_offset;
 
+                        /* If CatchUp= is disabled and the computed next elapse is in the past,
+                         * skip ahead to the next future elapse time instead of triggering
+                         * immediately. This avoids firing timers that "missed" their window
+                         * while the timer unit was stopped. */
+                        if (!t->catch_up && v->next_elapse < ts.realtime) {
+                                r = calendar_spec_next_usec(v->calendar_spec, ts.realtime - random_offset, &v->next_elapse);
+                                if (r < 0)
+                                        continue;
+                                v->next_elapse += random_offset;
+                        }
+
                         if (rebase_after_boot_time) {
                                 /* To make the delay due to RandomizedDelaySec= work even at boot, if the scheduled
                                  * time has already passed, set the time when systemd first started as the scheduled
@@ -501,7 +515,7 @@ static void timer_enter_waiting(Timer *t, bool time_change) {
                         if (!time_change)
                                 v->next_elapse = usec_add(usec_shift_clock(base, CLOCK_MONOTONIC, TIMER_MONOTONIC_CLOCK(t)), v->value);
 
-                        if (dual_timestamp_is_set(&t->last_trigger) &&
+                        if ((dual_timestamp_is_set(&t->last_trigger) || !t->catch_up) &&
                             !time_change &&
                             v->next_elapse < triple_timestamp_by_clock(&ts, TIMER_MONOTONIC_CLOCK(t)) &&
                             IN_SET(v->base, TIMER_ACTIVE, TIMER_BOOT, TIMER_STARTUP)) {

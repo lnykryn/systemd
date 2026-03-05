@@ -60,6 +60,7 @@ typedef struct Timer {
         bool on_timezone_change;
         bool fixed_random_delay;
         bool defer_reactivation;
+        bool catch_up;
 
         char *stamp_path;
 } Timer;

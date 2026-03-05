@@ -448,6 +448,7 @@ Most timer unit settings are available to transient units.
 ✓ OnClockChange=
 ✓ FixedRandomDelay=
 ✓ DeferReactivation=
+✓ CatchUp=
 ✓ AccuracySec=
 ✓ RandomizedDelaySec=
 ✓ OnActiveSec=

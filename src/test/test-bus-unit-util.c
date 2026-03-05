@@ -947,6 +947,7 @@ TEST(timer_properties) {
                         "OnClockChange=true",
                         "FixedRandomDelay=yes",
                         "DeferReactivation=true",
+                        "CatchUp=true",
 
                         "AccuracySec=1s",
                         "AccuracySec=10min",

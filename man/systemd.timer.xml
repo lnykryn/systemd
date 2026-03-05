@@ -355,6 +355,26 @@
       </varlistentry>
 
       <varlistentry>
+        <term><varname>CatchUp=</varname></term>
+
+        <listitem><para>Takes a boolean argument. If true (the default), the timer will fire immediately when
+        started if it would have elapsed at least once during the time when the timer was inactive. This
+        "catch-up" behavior ensures that no scheduled runs are missed. If false, the timer will skip any
+        elapsed events and instead schedule the next elapse time in the future. This is useful for timers that
+        should only fire at their next naturally scheduled time, regardless of how long the timer was
+        stopped.</para>
+
+        <para>For example, consider a timer set to fire every 5 minutes. If the timer is stopped for 20
+        minutes and then restarted, the default behavior (<option>true</option>) will trigger the service
+        immediately on restart. With <varname>CatchUp=false</varname>, the timer will instead wait until the
+        next 5-minute boundary.</para>
+
+        <para>Defaults to <option>true</option>.</para>
+
+        <xi:include href="version-info.xml" xpointer="v259"/></listitem>
+      </varlistentry>
+
+      <varlistentry>
         <term><varname>OnClockChange=</varname></term>
         <term><varname>OnTimezoneChange=</varname></term>
 

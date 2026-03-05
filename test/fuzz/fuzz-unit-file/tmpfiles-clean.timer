@@ -34,6 +34,7 @@ AccuracySec=24h
 RandomizedDelaySec=234234234
 FixedRandomDelay=true
 DeferReactivation=true
+CatchUp=yes
 
 Persistent=no
 Unit=foo.service
